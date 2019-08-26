@@ -1,0 +1,78 @@
+import requests
+import json
+from bs4 import BeautifulSoup
+from googletrans import Translator
+
+def nytimes():
+	page = requests.get('https://www.nytimes.com/section/world/asia')
+	soup = BeautifulSoup(page.content, 'html.parser')
+	nytimes = soup.select('div > div.css-4jyr1y > a > h2')
+	for title in nytimes:
+		#키워드 필터링
+		if('Korea' in title.text):
+			print(googletrans(title.text))
+			print(title.parent.get('href'))
+			
+
+def inshorts():
+	page = requests.get('https://inshorts.com/en/read/world')
+	soup = BeautifulSoup(page.content, 'html.parser')
+	inshorts = soup.select('div > div.news-card-title.news-right-box > a > span')
+	for title in inshorts:
+		#키워드 필터링
+		if('Korea' in title.text):
+			print(googletrans(title.text))
+			print(title.parent.get('href'))
+			
+
+def usatoday():
+	page = requests.get('https://www.usatoday.com/news/world/')
+	soup = BeautifulSoup(page.content, 'html.parser')
+	#헤드라인 따로, 부 기사 따로 추출. 셀렉터가 다름.
+	usatoday = soup.select('div > div > div.hero-text > div > h1 > a > span')
+	for title in usatoday:
+		#키워드 필터링
+		if('Korea' in title.text):
+			print(googletrans(title.text))
+			print(title.parent.get('href'))
+	#usatoday = soup.find_all(attrs={"itemprop": "headline"})
+	usatoday = soup.select('a > span.hgpm-list-wrap.js-list-wrap > span.hgpm-list-text > span.hgpm-list-hed.js-asset-headline.placeholder-bg')
+	for title in usatoday:
+		#키워드 필터링
+		if('Korea' in title.text):
+			print(googletrans(title.text))
+			print(title.parent.get('href'))
+
+#latimes는 파싱이 안됌. 이유불문. error : The request could not be satisfied.
+def latimes():
+	page = requests.get('https://www.latimes.com/world-nation')
+	soup = BeautifulSoup(page.content, 'html.parser')
+	#latimes = soup.select('div > main > div > div > div > div > div > div > div > a')
+	for title in latimes:
+		#키워드 필터링
+		if('Korea' in title.text):
+			print(googletrans(title.text))
+			print(title.parent.get('href'))
+		
+def wsj():
+	page = requests.get('https://www.wsj.com/news/types/asia-news')
+	soup = BeautifulSoup(page.content, 'html.parser')
+	wsj = soup.select('div > div > div > div > div > div > div > div > div > article > div > div > h3 > a')
+	for title in wsj:
+		#키워드 필터링
+		if('Korea' in title.text):
+			print(googletrans(title.text))
+			#특별 사항. a 태그와 함께 title이 있음.
+			print(title.get('href'))
+			
+
+def googletrans(text):
+	translator = Translator()
+	return translator.translate(text, src='en', dest='ko').text
+		
+		
+nytimes()
+inshorts()
+usatoday()
+wsj()
+#latimes()
