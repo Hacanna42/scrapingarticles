@@ -1,0 +1,103 @@
+import requests
+from bs4 import BeautifulSoup
+
+month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+
+def usatoday():
+	titles = []
+	links = []
+	dates = []
+	authors = []
+	contents = []
+
+	page = requests.get('https://www.usatoday.com/search/?q=Korea')
+	soup = BeautifulSoup(page.content, 'html.parser')
+
+	usatoday = soup.select('div.gnt_se_hl')
+	for title in usatoday:
+		#키워드 필터링
+		#if('Korea' in title.text):
+		if (title.parent.parent.get('href').find("/world/")!=-1):
+			#print(title.parent.parent.get('href'))
+			titles.append(title.text)
+			links.append(title.parent.parent.get('href'))
+        
+    	#이 화면에서 저자, 날짜 빼오기
+		dtby = title.parent.find(attrs={"class": "gnt_se_dtby"})
+		if (dtby!=None):
+			#print("******************************",dtby.get('data-c-by'),"******************************")
+			#print("******************************",dtby.get('data-c-dt'),"******************************")
+			authors.append(dtby.get('data-c-by'))
+			dates.append(dtby.get('data-c-dt'))
+            
+	print(titles)
+	print(links)
+	print(dates)
+	print(authors)
+	
+	
+def nypost():
+	titles = []
+	links = []
+	dates = []
+	authors = []
+	contents = []
+
+	page = requests.get('https://nypost.com/search/korea')
+	soup = BeautifulSoup(page.content, 'html.parser')
+
+	usatoday = soup.select('div.entry-header > h3 > a')
+	for title in usatoday:
+		#키워드 필터링
+		if('Korea' in title.text):
+		#if (title.parent.parent.get('href').find("/world/")!=-1):
+			titles.append(title.text)
+			links.append(title.get('href'))
+			
+			#이 화면에서 저자, 날짜 빼오기
+			count = -1
+			cut = 0;
+			author = ""
+			date = ""
+			dtby = title.parent.parent.find(attrs={"class": "entry-meta"})
+			dtby_temp = dtby.text.split(" ")
+			
+			#authors, dates 다듬기
+			
+			for i in dtby_temp:
+				#print(i)
+				for j in month:
+					if i == j:
+						#print("find,",j)
+						cut = count;
+				count+=1
+			
+			for i in range(cut):
+				#print(i)
+				author+=dtby_temp[i+1]
+				author+=" "
+				
+			for i in range(cut, len(dtby_temp)-1):
+				date+=dtby_temp[i+1]
+				date+=" "
+				
+			#authors, dates 출력
+				
+			if (cut>0):
+				authors.append(author.strip())
+				dates.append(date.strip())
+			else:
+				authors.append("ERROR")
+				dates.append("ERROR")
+			
+			
+	print(titles)
+	print(links)
+	print(dates)
+	print(authors)
+	
+
+usatoday()
+print("\n\n\n************ CHANGE ************\n\n\n")
+nypost()
