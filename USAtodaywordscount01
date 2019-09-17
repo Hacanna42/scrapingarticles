@@ -1,0 +1,43 @@
+from django.http import HttpResponse
+from django.shortcuts import render
+import operator
+import requests
+from bs4 import BeautifulSoup
+
+# 페이지 고정
+deeppage =  'https://usatoday.com/story/news/world/2019/08/22/south-korea-end-intelligence-sharing-deal-japan/2081846001/'
+page = requests.get(deeppage)
+soup = BeautifulSoup(page.content, 'html.parser')
+num = 1;
+content = ""
+attrsforcon = 'speakable-p-1 p-text'
+contentf = soup.find(attrs={"class": attrsforcon})
+
+# ---------------- 문장 스크래핑 ---------------- #
+while (contentf!=None):
+	content+=contentf.text
+	num+=1
+	attrsforcon = 'speakable-p-'
+	attrsforcon += str(num)
+	attrsforcon += ' p-text'
+	contentf = soup.find(attrs={"class": attrsforcon})
+    
+for contentf in soup.find_all(attrs={"class": "p-text"}):
+	content+=contentf.text
+	num+=1
+# ---------------- 문장 스크래핑 ---------------- #
+
+
+# ---------------- Word Count ---------------- #
+wordlist = content.split()
+worddictionary = {}
+for word in wordlist:
+	if word in worddictionary:
+		#Increase
+		worddictionary[word] += 1
+	else:
+		#add to the dictionary
+		worddictionary[word] = 1
+			
+sortedwords = sorted(worddictionary.items(), key=operator.itemgetter(1), reverse=True)
+print(sortedwords)
