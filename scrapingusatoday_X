@@ -1,0 +1,68 @@
+def usatoday():
+	titles = []
+	links = []
+	dates = []
+	authors = []
+	contents = []
+	
+
+	# page = requests.get('https://www.usatoday.com/search/?q=Korea')
+	# soup = BeautifulSoup(page.content, 'html.parser')
+	#usatoday = soup.select('div.gnt_se_hl')
+	for page in range (1,4):
+		changepage = "https://www.usatoday.com/search/?q=Korea&page="
+		changepage += str(page)
+		#print("page = ",changepage)
+		page = requests.get(changepage)
+		soup = BeautifulSoup(page.content, 'html.parser')
+		usatoday = soup.select('div.gnt_se_hl')
+		
+		for title in usatoday:
+			#키워드 필터링
+			#if('Korea' in title.text):
+			#if (title.parent.parent.get('href').find("/world/")!=-1):
+			#print(title.parent.parent.get('href'))
+			
+			titles.append(title.text)
+			links.append(title.parent.parent.get('href'))
+        
+    		#이 화면에서 저자, 날짜 빼오기
+			dtby = title.parent.find(attrs={"class": "gnt_se_dtby"})
+			if (dtby!=None):
+				#print("******************************",dtby.get('data-c-by'),"******************************")
+				#print("******************************",dtby.get('data-c-dt'),"******************************")
+				authors.append(dtby.get('data-c-by'))
+				dates.append(dtby.get('data-c-dt'))
+			elif (dtby==None):
+				dtby = title.parent.parent.find(attrs={"class": "gnt_se_dt"})
+				dates.append(dtby.get('data-c-dt'))
+				# - 저자가 표기되어 있지 않음.
+				authors.append("Unknown")
+			
+			#내용을 긁어오기 위해 기사를 눌렀을 때 나오는 링크로 들어갑니다.
+			#deeppage = 'https://usatoday.com'
+			#deeppage += title.parent.parent.get('href')
+			deeppage =  'https://usatoday.com/story/news/world/2019/08/22/south-korea-end-intelligence-sharing-deal-japan/2081846001/'
+			page = requests.get(deeppage)
+			soup = BeautifulSoup(page.content, 'html.parser')
+			num = 1;
+			content = ""
+			
+			attrsforcon = 'speakable-p-1 p-text'
+			contentf = soup.find(attrs={"class": attrsforcon})
+			
+			#첫번째 문장 스크래핑
+			while (contentf!=None):
+				content+=contentf.text
+				#print(contents.text)
+				num+=1
+				attrsforcon = 'speakable-p-'
+				attrsforcon += str(num)
+				attrsforcon += ' p-text'
+				contentf = soup.find(attrs={"class": attrsforcon})
+
+			#두번쨰 문장 스크래핑
+			for contentf in soup.find_all(attrs={"class": "p-text"}):
+				content+=contentf.text
+				#print(contents.text)
+				num+=1
